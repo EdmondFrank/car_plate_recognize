@@ -41,7 +41,7 @@ def gene_text(char_set=number+ALPHABET, captcha_size=7):
     captcha_text = []
     captcha_text.append(random.choice(Province))
     captcha_text.append(random.choice(ALPHABET))
-    captcha_text.append(' · ')
+    #captcha_text.append(' · ')
     for i in range(2,captcha_size):
     	c = random.choice(char_set)
     	captcha_text.append(c)
