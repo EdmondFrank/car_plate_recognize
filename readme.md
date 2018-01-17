@@ -1,2 +1,2 @@
 # Intro
-this project still on developing now!
+this project is still on developing now!
