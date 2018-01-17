@@ -27,21 +27,13 @@ number = ['0','1','2','3','4','5','6','7','8','9']
 Province = ['京', '津', '沪', '渝', '冀', '豫', '云', '辽', '黑', '湘', '皖', '鲁', '新', '苏', '浙', '赣', '鄂', '桂', '甘', '晋', '蒙', '陕',
 '吉', '闽', '贵', '粤', '青', '藏', '川', '宁', '琼']
 ALPHABET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-def convert2gray(img):
-	if len(img.shape) > 2:
-		gray = np.mean(img, -1)
-		# 上面的转法较快，正规转法如下
-		# r, g, b = img[:,:,0], img[:,:,1], img[:,:,2]
-		# gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
-		return gray
-	else:
-		return img
+
 # 验证码一般都无视大小写；验证码长度4个字符
 def gene_text(char_set=number+ALPHABET, captcha_size=7):
     captcha_text = []
     captcha_text.append(random.choice(Province))
     captcha_text.append(random.choice(ALPHABET))
-    #captcha_text.append(' · ')
+    captcha_text.append(' · ')
     for i in range(2,captcha_size):
     	c = random.choice(char_set)
     	captcha_text.append(c)
@@ -86,9 +78,10 @@ def gene_code():
     #image = image.transform((width+30,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
     #image = image.transform((width+20,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
     #image = image.filter(ImageFilter.EDGE_ENHANCE_MORE) #滤镜，边界加强
-    #img = convert2gray(image)
+    text = text.replace(' · ','')
+    img = image.convert('L')
     #img.save('%s.png' % text)
-    return text,np.array(image)
+    return text,np.array(img)
     
 def gen_captcha_text_and_image():
     captcha_text,captcha = gene_code()
@@ -96,6 +89,13 @@ def gen_captcha_text_and_image():
     #captcha_image = Image.open(captcha)
     captcha_image = np.array(captcha)
     return captcha_text, captcha_image
-
+def convert2gray(img):
+    I = Image.open(img)
+    I.show()
+    L = I.convert('L')   #转化为灰度图
+    
+    #L = I.convert('1')   #转化为二值化图
+    L.show()
 if __name__ == "__main__":
-    gene_code()
+    #gene_code()
+    convert2gray("timg.jpeg")

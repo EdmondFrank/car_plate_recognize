@@ -124,16 +124,16 @@ def get_next_batch2(batch_size=128):
         while True:
             text, image = gene_code()
             #print(image.shape)
-            if image.shape == (60,180, 4):
+            if image.shape == (60,180):
                 return text, image
     for i in range(batch_size):
         text, image = wrap_gen_captcha_text_and_image()
-        image = convert2gray(image)
+        #image = convert2gray(image)
 
         batch_x[i,:] = image.flatten() / 255 # (image.flatten()-128)/128  mean为0
         batch_y[i,:] = text2vec(text)
 
-    return batch_x, batch_y
+    return batch_x,batch_y
 
 def text2vec(text):  #文本转向量 
     text_len = len(text) 
@@ -315,15 +315,15 @@ def train_detect_np_cnn(max_step=200):
             _, _loss = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.75})
             #print(sess.run(max_idx_p, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
             #print(sess.run(max_idx_l, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
-            print("step is:" + str(step), "acc is :" + str(_loss))
+            print("step is:" + str(step), "loss is :" + str(_loss))
             if step % 100 == 0:
                 batch_x_test, batch_y_test = get_next_batch2(100)
-                #acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
+                acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 summary, acc = sess.run([merged, accuracy], feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.}) 
                 writer.add_summary(summary, step)
                 print(step,acc)
                 # 如果准确率大于80%,保存模型,完成训练
-                if acc > 0.80:
+                if acc > 0.5:
                     saver.save(sess, "./model/crack_capcha.model", global_step=step)
                     break
 
@@ -342,7 +342,7 @@ def predict(testdata):
         for i in range(batch_size): 
             text, image = getImageAndName(testdata[i]) 
             image = convert2gray(image) 
-            captcha_image = image.flatten() / 255 
+            captcha_image = imagenerate_tfrecordsge.flatten() / 255 
             captcha_image = image.flatten() 
             predict = tf.argmax(tf.reshape(output, [-1, MAX_NP, CHAR_SET_LEN]), 2) 
             text_list = sess.run(predict, feed_dict={X: [captcha_image], keep_prob: 1}) 
