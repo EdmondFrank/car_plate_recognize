@@ -63,7 +63,7 @@ def create_points(draw,width,height):
 def gene_code():
     width,height = size #宽和高
     image = Image.new('RGBA',(width,height),bgcolor) #创建图片
-    font = ImageFont.truetype('./msyh.ttf',32) #验证码的字体
+    font = ImageFont.truetype('./simhei.ttf',32) #验证码的字体
     draw = ImageDraw.Draw(image)  #创建画笔
     text = gene_text() #生成字符串
     font_width, font_height = font.getsize(text)
@@ -79,7 +79,7 @@ def gene_code():
     #image = image.transform((width+30,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
     #image = image.transform((width+20,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
     #image = image.filter(ImageFilter.EDGE_ENHANCE_MORE) #滤镜，边界加强
-    text = text.replace(' · ','')
+    text = text.replace('·','')
     img = image.convert('L')
     #img.save('%s.png' % text)
     return text,np.array(img)
@@ -114,10 +114,11 @@ def gen_image(text):
     #image = image.transform((width+30,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
     #image = image.transform((width+20,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
     #image = image.filter(ImageFilter.EDGE_ENHANCE_MORE) #滤镜，边界加强
-    text = text.replace(' · ','')
+    text = text.replace('·','')
     img = image.convert('L')
-    #img.save('%s.png' % text)
+    img.save('%s.png' % text)
     return img
 if __name__ == "__main__":
     #gene_code()
-    convert2gray("timg.jpeg")
+    #convert2gray("timg.jpeg")
+    gen_image("京·PH3X00")

@@ -285,7 +285,7 @@ def train_detect_np_cnn(max_step=200):
     #     # optimizer 为了加快训练 learning_rate应该开始大，然后慢慢衰 
     print("define train")
     with tf.name_scope('train'): 
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(loss) 
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.00001).minimize(loss) 
         predict = tf.reshape(output, [-1, MAX_NP, CHAR_SET_LEN]) 
         max_idx_p = tf.argmax(predict, 2) 
         YY = tf.reshape(Y, [-1, MAX_NP, CHAR_SET_LEN]) 
@@ -326,7 +326,7 @@ def train_detect_np_cnn(max_step=200):
                 #acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 print(step,acc)
                 # 如果准确率大于80%,保存模型,完成训练
-                if acc > 0.8:
+                if acc > 0.99:
                     saver.save(sess, "./model/crack_capcha.model", global_step=step)
                     break
             if step % 1000 == 0:
@@ -336,11 +336,11 @@ def train_detect_np_cnn(max_step=200):
 def id2text(id_ary):
     text = []
     for id in id_ary:
-        if id < 9:
+        if id < 10:
             char_code = id + ord('0') 
             zm = chr(char_code) 
             text.append(zm)
-        elif id < 37:
+        elif id < 36:
             char_code = id - 10 + ord('A') 
             text.append(chr(char_code))
         elif id < 68:
@@ -381,5 +381,5 @@ def predict(size):
         print('\n识别结果: {}/{}={}'.format(count, batch_size, count / batch_size))
 
 if __name__ == '__main__': 
-    train_detect_np_cnn(max_step=10000) #训练10000次 #
-    #predict(1)
+    #train_detect_np_cnn(max_step=10000) #训练10000次 #
+    predict(1000)
