@@ -305,7 +305,7 @@ def train_detect_np_cnn(max_step=200):
         print("begin to train")
         while True: 
             #batch_x, batch_y = get_next_batch(sampleTrain(128, traindata))
-            batch_x, batch_y = get_next_batch2(64) 
+            batch_x, batch_y = get_next_batch2(128) 
             #_, lossSize = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.8}) 
             #writer.add_summary(summary, step) 
             #if step % 5 == 0: 
@@ -313,11 +313,12 @@ def train_detect_np_cnn(max_step=200):
             #batch_x_test, batch_y_test = get_next_batch(testdata)
             #batch_x_test, batch_y_test = get_next_batch2(100) 
             _, _loss = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.75})
-            #print(sess.run(max_idx_p, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
-            #print(sess.run(max_idx_l, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
+            
             print("step is:" + str(step), "loss is :" + str(_loss))
             if step % 100 == 0:
                 batch_x_test, batch_y_test = get_next_batch2(100)
+                print(sess.run(max_idx_p, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
+                print(sess.run(max_idx_l, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
                 acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 summary, acc = sess.run([merged, accuracy], feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.}) 
                 writer.add_summary(summary, step)
