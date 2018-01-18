@@ -302,11 +302,12 @@ def train_detect_np_cnn(max_step=200):
         writer = tf.summary.FileWriter("./graph", sess.graph) 
         test_writer = tf.summary.FileWriter("./test", sess.graph) 
         sess.run(tf.global_variables_initializer()) 
+        saver.restore(sess, tf.train.latest_checkpoint('./model/'))
         step = 0 
         print("begin to train")
         while True: 
             #batch_x, batch_y = get_next_batch(sampleTrain(128, traindata))
-            batch_x, batch_y = get_next_batch2(128) 
+            batch_x, batch_y = get_next_batch2(64) 
             #_, lossSize = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.8}) 
             #writer.add_summary(summary, step) 
             #if step % 5 == 0: 
@@ -325,13 +326,33 @@ def train_detect_np_cnn(max_step=200):
                 #acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 print(step,acc)
                 # 如果准确率大于80%,保存模型,完成训练
-                if acc > 0.5:
+                if acc > 0.8:
                     saver.save(sess, "./model/crack_capcha.model", global_step=step)
                     break
             if step % 1000 == 0:
                 saver.save(sess, "./model/%d-crack_capcha.model" % step, global_step=step)
 
             step += 1 # 训练
+def id2text(id_ary):
+    text = []
+    for id in id_ary:
+        if id < 9:
+            char_code = id + ord('0') 
+            zm = chr(char_code) 
+            text.append(zm)
+        elif id < 37:
+            char_code = id - 10 + ord('A') 
+            text.append(chr(char_code))
+        elif id < 68:
+            for key in dicthz: 
+                if id == dicthz[key]: 
+                    zm = key 
+                    text.append(zm)
+        elif id == 68: 
+            char_code = ord('_') 
+            zm = chr(char_code)
+            text.append(zm)
+    return "".join(text) 
 
 def predict(size): 
     X = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT * IMAGE_WIDTH]) 
@@ -348,10 +369,11 @@ def predict(size):
             #image = convert2gray(image) 
             captcha_image = image.flatten() / 255 
             #captcha_image = image.flatten() 
-            predict = tf.argmax(tf.reshape(output, [-1, MAX_NP, CHAR_SET_LEN]), 2) 
-            text_list = sess.run(predict, feed_dict={X: [captcha_image], keep_prob: 1}) 
+            predict = tf.argmax(tf.reshape(output, [-1, MAX_NP, CHAR_SET_LEN]),2) 
+            text_list = sess.run(predict, feed_dict={X: [captcha_image], keep_prob: 1})
+            #print(text_list) 
             predict_text = text_list[0]
-            predict_value = vec2text(predict_text) 
+            predict_value = id2text(predict_text) 
             flag = (text == predict_value)
             if flag:
                 count += 1 
@@ -360,4 +382,4 @@ def predict(size):
 
 if __name__ == '__main__': 
     train_detect_np_cnn(max_step=10000) #训练10000次 #
-    #predict(10)
+    #predict(1)

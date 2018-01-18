@@ -28,7 +28,7 @@ class TestTrain(unittest.TestCase):
         #print(vec)
     def test_get_next_batch(self):
         batch_x,batch_y = get_next_batch2(2)
-        for i in range(2): 
+        for i in range(1): 
             #text, image = gene_code()
             text = vec2text(batch_y[i,:])
             #image = gen_image(text)
@@ -48,7 +48,8 @@ class TestTrain(unittest.TestCase):
             #predict_text = text_list[0]
             #predict_value = vec2text(predict_text) 
             #self.assertEqual(text, predict_text)
-
+    def test_id2text(self):
+        self.assertEqual('晋SPHC2M',id2text([56,28,25,17,12,2,22]))
 
 if __name__ == '__main__':
     unittest.main()
