@@ -57,9 +57,9 @@ CHAR_SET_LEN = len(char_set) #68
 
 # 图像大小
 
-IMAGE_HEIGHT = 60 # 45
+IMAGE_HEIGHT = 40 # 45
 
-IMAGE_WIDTH =  180
+IMAGE_WIDTH =  190
 
 MAX_NP = 7
 
@@ -118,13 +118,13 @@ def convert2gray(img):
 # 生成一个训练batch
 def get_next_batch2(batch_size=128):
     batch_x = np.zeros([batch_size, IMAGE_HEIGHT*IMAGE_WIDTH])
-    batch_y = np.zeros([batch_size, MAX_NP*CHAR_SET_LEN])
+    batch_y = np.zeros([batch_size, CHAR_SET_LEN*MAX_NP])
     # 有时生成图像大小不是(60, 160, 3)
     def wrap_gen_captcha_text_and_image():
         while True:
             text, image = gene_code()
             #print(image.shape)
-            if image.shape == (60,180):
+            if image.shape == (IMAGE_HEIGHT,IMAGE_WIDTH):
                 return text, image
     for i in range(batch_size):
         text, image = wrap_gen_captcha_text_and_image()
@@ -266,7 +266,7 @@ def detect_np_cnn(X, keep_prob, w_alpha=0.01, b_alpha=0.1):
         out = tf.add(tf.matmul(dense, w_out), b_out)
         tf.summary.histogram('output', out)# 
         #out = tf.nn.softmax(out)
-        return out
+    return out
 
 #traindata, testdata = getSplitData(PATH)
 
@@ -276,6 +276,7 @@ def train_detect_np_cnn(max_step=200):
     keep_prob = tf.placeholder(tf.float32) # dropout 
     output = detect_np_cnn(X, keep_prob) # loss 
     ## loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=output, labels=Y))
+    #output = detect_np_cnn()
     print("define loss") 
     with tf.name_scope('loss'): 
         loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=output, labels=Y)) 
@@ -312,25 +313,27 @@ def train_detect_np_cnn(max_step=200):
             #    print("step is:" + str(step), "损失函数大小为" + str(lossSize)) 
             #batch_x_test, batch_y_test = get_next_batch(testdata)
             #batch_x_test, batch_y_test = get_next_batch2(100) 
-            _, _loss = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.75})
+            _, _loss = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.8})
             
-            print("step is:" + str(step), "loss is :" + str(_loss))
+            print("step is: " + str(step), "loss is : " + str(_loss))
             if step % 100 == 0:
                 batch_x_test, batch_y_test = get_next_batch2(100)
                 print(sess.run(max_idx_p, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
                 print(sess.run(max_idx_l, feed_dict={X:batch_x_test, Y: batch_y_test, keep_prob: 1.})) 
-                acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 summary, acc = sess.run([merged, accuracy], feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.}) 
                 writer.add_summary(summary, step)
+                #acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 print(step,acc)
                 # 如果准确率大于80%,保存模型,完成训练
                 if acc > 0.5:
                     saver.save(sess, "./model/crack_capcha.model", global_step=step)
                     break
+            if step % 1000 == 0:
+                saver.save(sess, "./model/%d-crack_capcha.model" % step, global_step=step)
 
             step += 1 # 训练
 
-def predict(testdata): 
+def predict(size): 
     X = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT * IMAGE_WIDTH]) 
     keep_prob = tf.placeholder(tf.float32) 
     output = detect_np_cnn(X, keep_prob) 
@@ -338,21 +341,23 @@ def predict(testdata):
     with tf.Session() as sess: 
         sess.run(tf.global_variables_initializer()) 
         saver.restore(sess, tf.train.latest_checkpoint('./model/'))
-        batch_size = len(testdata) 
+        batch_size = size
         count = 0 
         for i in range(batch_size): 
-            text, image = getImageAndName(testdata[i]) 
-            image = convert2gray(image) 
-            captcha_image = imagenerate_tfrecordsge.flatten() / 255 
-            captcha_image = image.flatten() 
+            text, image = gene_code()
+            #image = convert2gray(image) 
+            captcha_image = image.flatten() / 255 
+            #captcha_image = image.flatten() 
             predict = tf.argmax(tf.reshape(output, [-1, MAX_NP, CHAR_SET_LEN]), 2) 
             text_list = sess.run(predict, feed_dict={X: [captcha_image], keep_prob: 1}) 
-            predict_text = text_list[0].tolist() 
+            predict_text = text_list[0]
             predict_value = vec2text(predict_text) 
-            if text == predict_value: 
+            flag = (text == predict_value)
+            if flag:
                 count += 1 
             print("真实值: {}, 预测值: {}, 是否相等: {}".format(text, predict_value, flag)) 
         print('\n识别结果: {}/{}={}'.format(count, batch_size, count / batch_size))
 
 if __name__ == '__main__': 
-    train_detect_np_cnn(max_step=10000) #训练10000次 #predict(testdata)
+    train_detect_np_cnn(max_step=10000) #训练10000次 #
+    #predict(10)

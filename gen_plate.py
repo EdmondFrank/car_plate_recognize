@@ -3,12 +3,13 @@ import random
 import string
 import sys
 import math
+#from train import *
 from PIL import Image,ImageDraw,ImageFont,ImageFilter
 import numpy as np
 #生成几位数的验证码
 number = 7
 #生成验证码图片的高度和宽度
-size = (180,60)
+size = (190,40)
 #背景颜色，默认为白色
 bgcolor = (0,0,255)
 #字体颜色，默认为蓝色
@@ -51,7 +52,7 @@ def rotate(img):
 def create_points(draw,width,height):
         '''绘制干扰点'''
         #chance = min(100, max(0, 100)) # 大小限制在[0, 100]  # 设置干扰点在所有点中所占比例
-        chance = 8
+        chance = 5
         for w in range(width):
             for h in range(height):
                 tmp = random.randint(0, 100)
@@ -96,6 +97,27 @@ def convert2gray(img):
     
     #L = I.convert('1')   #转化为二值化图
     L.show()
+def gen_image(text):
+    width,height = size #宽和高
+    image = Image.new('RGBA',(width,height),bgcolor) #创建图片
+    font = ImageFont.truetype('./msyh.ttf',32) #验证码的字体
+    draw = ImageDraw.Draw(image)  #创建画笔
+    font_width, font_height = font.getsize(text)
+    number = 7
+    draw.text(((width - font_width) / number, (height - font_height) / number),text,
+            font= font,fill=fontcolor) #填充字符串、
+    if draw_line:
+        gene_line(draw,width,height)
+    if draw_point:
+        create_points(draw,width,height)
+    #image = rotate(image)
+    #image = image.transform((width+30,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
+    #image = image.transform((width+20,height+10), Image.AFFINE, (1,-0.3,0,-0.1,1,0),Image.BILINEAR)  #创建扭曲
+    #image = image.filter(ImageFilter.EDGE_ENHANCE_MORE) #滤镜，边界加强
+    text = text.replace(' · ','')
+    img = image.convert('L')
+    #img.save('%s.png' % text)
+    return img
 if __name__ == "__main__":
     #gene_code()
     convert2gray("timg.jpeg")
