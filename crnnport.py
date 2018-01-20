@@ -52,8 +52,10 @@ def crnnRec(model,converter,im,text_recs):
        pt2 = (rec[2],rec[3])
        pt3 = (rec[6],rec[7])
        pt4 = (rec[4],rec[5])
+       
        partImg = dumpRotateImage(im,degrees(atan2(pt2[1]-pt1[1],pt2[0]-pt1[0])),pt1,pt2,pt3,pt4)
-       #mahotas.imsave('%s.jpg'%index, partImg)
+       #print(partImg)
+       mahotas.imsave('%s.jpg'%index, partImg)
        
 
        image = Image.fromarray(partImg ).convert('L')
