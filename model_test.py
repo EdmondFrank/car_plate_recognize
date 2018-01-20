@@ -3,6 +3,8 @@ import numpy as np
 import os
 from PIL import Image
 import cv2
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import model
 index = {"京": 0, "沪": 1, "津": 2, "渝": 3, "冀": 4, "晋": 5, "蒙": 6, "辽": 7, "吉": 8, "黑": 9, "苏": 10, "浙": 11, "皖": 12,
@@ -41,19 +43,31 @@ def get_one_image(test):
     print(image.shape)
 
     return image
+def test_one_image(img_dir):
+    image_show = Image.open(img_dir)
+    plt.imshow(image_show)
+    image = cv2.imread(img_dir)
+    print(image)
+    image = cv2.resize(image,(272,72),interpolation=cv2.INTER_CUBIC)
+    img = np.multiply(image,1/255.0)
+    #image = np.array(img)
+    #image = img.transpose(1,0,2)
+    image = np.array([img])
+    print(image.shape)
 
+    return image
 batch_size = 1
 x = tf.placeholder(tf.float32,[batch_size,72,272,3])
 keep_prob =tf.placeholder(tf.float32)
 
-test_dir = './plate'
+test_dir = './plate/'
 test_image = []
 for file in os.listdir(test_dir):
     test_image.append(test_dir + file)
 test_image = list(test_image)
 
-image_array = get_one_image(test_image)
-
+#image_array = get_one_image(test_image)
+image_array = test_one_image("/home/ef/python/car_plate_recognize/plate/test4.png")
 #logit = model.inference(x,keep_prob)
 logit1,logit2,logit3,logit4,logit5,logit6,logit7 = model.inference(x,keep_prob)
 

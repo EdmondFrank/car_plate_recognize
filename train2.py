@@ -40,7 +40,8 @@ train_op1,train_op2,train_op3,train_op4,train_op5,train_op6,train_op7 = model.tr
 train_acc = model.evaluation(train_logits1,train_logits2,train_logits3,train_logits4,train_logits5,train_logits6,train_logits7,label_holder)
 
 input_image=tf.summary.image('input',image_holder)
-#tf.summary.histogram('label',label_holder) #label的histogram,测试训练代码时用，参考:http://geek.csdn.net/news/detail/197155
+#tf.summary.histogram('label',label_holder)
+#  #label的histogram,测试训练代码时用，参考:http://geek.csdn.net/news/detail/197155
 
 summary_op = tf.summary.merge(tf.get_collection(tf.GraphKeys.SUMMARIES))
 #sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))  #运行日志
@@ -67,12 +68,12 @@ for step in range(count):
 
     #print(y_batch)  #仅测试代码训练实际样本与标签是否一致
 
-    if step % 10== 0:
+    if step % 10 == 0:
         sec_per_batch = float(duration)
-        print('%s : Step %d,train_loss = %.2f,acc= %.2f,sec/batch=%.3f' %(time_str,step,tra_all_loss,acc,sec_per_batch)
-
-    if step % 10000==0 or (step+1) == count:
-        checkpoint_path = os.path.join(logs_train_dir,'model.ckpt')
+        print('%s : Step %d,train_loss = %.2f,acc= %.2f,sec/batch=%.3f' %(time_str,step,tra_all_loss,acc,sec_per_batch))
+    flag = (step % 1000==0) or ((step+1) == count)
+    if flag:
+        checkpoint_path = os.path.join(logs_train_dir,'model-%d.ckpt'% step)
         saver = tf.train.Saver()
         saver.save(sess,checkpoint_path,global_step=step)
 sess.close()       
