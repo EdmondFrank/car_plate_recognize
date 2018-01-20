@@ -115,7 +115,7 @@ test_image = []
 for file in os.listdir(test_dir):
     test_image.append(test_dir + file)
 test_image = list(test_image)
-for i in range(1,6):
+for i in range(1,7):
     image_array = test_one_image(test_dir+'%d.png'%i)
     print("predict picture %d"%i)
     predict(image_array)

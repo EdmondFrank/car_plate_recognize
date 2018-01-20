@@ -50,7 +50,16 @@ train_writer = tf.summary.FileWriter(logs_train_dir,sess.graph)
 saver = tf.train.Saver()
 
 sess.run(tf.global_variables_initializer())
-
+#-----------------------keeping train 
+print ("Reading checkpoint...")
+ckpt = tf.train.get_checkpoint_state(logs_train_dir)
+if ckpt and ckpt.model_checkpoint_path:
+    global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+    saver.restore(sess, ckpt.model_checkpoint_path)
+    print('Loading success, global_step is %s' % global_step)
+else:
+    print('No checkpoint file found')
+#-----------------------------------
 start_time1 = time.time()    
 
 for step in range(count): 

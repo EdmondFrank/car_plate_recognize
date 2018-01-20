@@ -114,7 +114,7 @@ def r(val):
 
 def AddNoiseSingleChannel(single):
     diff = 255-single.max()
-    noise = np.random.normal(0,1+r(6),single.shape)
+    noise = np.random.normal(0,1+r(10),single.shape)
     noise = (noise - noise.min())/(noise.max()-noise.min())
     noise= diff*noise
     noise= noise.astype(np.uint8)
@@ -136,7 +136,7 @@ class GenPlate:
         self.fontE =  ImageFont.truetype(fontEng,60,0)
         self.img=np.array(Image.new("RGB", (226,70),(255,255,255)))
         self.bg  = cv2.resize(cv2.imread("./images/template.bmp"),(226,70))
-        self.smu = cv2.imread("./images/smu2.jpg")
+        self.smu = cv2.imread("./images/smu.jpg")
         self.noplates_path = []
         for parent,parent_folder,filenames in os.walk(NoPlates):
             for filename in filenames:
@@ -164,7 +164,7 @@ class GenPlate:
 
             com = tfactor(com)
             com = random_envirment(com,self.noplates_path)
-            com = AddGauss(com, 1+r(4))
+            com = AddGauss(com, 1+r(5))
             com = addNoise(com)
 
 
