@@ -36,6 +36,7 @@ def get_one_image(test):
     plt.imshow(image_show)
     #image = image.resize([120,30])
     image = cv2.imread(img_dir)
+    image = cv2.resize(image,(272,72),interpolation=cv2.INTER_CUBIC)
     img = np.multiply(image,1/255.0)
     #image = np.array(img)
     #image = img.transpose(1,0,2)
@@ -47,7 +48,7 @@ def test_one_image(img_dir):
     image_show = Image.open(img_dir)
     plt.imshow(image_show)
     image = cv2.imread(img_dir)
-    print(image)
+    #print(image)
     image = cv2.resize(image,(272,72),interpolation=cv2.INTER_CUBIC)
     img = np.multiply(image,1/255.0)
     #image = np.array(img)
@@ -56,18 +57,13 @@ def test_one_image(img_dir):
     print(image.shape)
 
     return image
+
+
 batch_size = 1
 x = tf.placeholder(tf.float32,[batch_size,72,272,3])
 keep_prob =tf.placeholder(tf.float32)
 
-test_dir = './plate/'
-test_image = []
-for file in os.listdir(test_dir):
-    test_image.append(test_dir + file)
-test_image = list(test_image)
-
-#image_array = get_one_image(test_image)
-image_array = test_one_image("/home/ef/python/car_plate_recognize/plate/test4.png")
+#image_array = test_one_image("/home/ef/python/car_plate_recognize/plate/test4.png")
 #logit = model.inference(x,keep_prob)
 logit1,logit2,logit3,logit4,logit5,logit6,logit7 = model.inference(x,keep_prob)
 
@@ -83,31 +79,44 @@ logs_train_dir = './model'
 
 saver = tf.train.Saver()
 
-with tf.Session() as sess:
-    print ("Reading checkpoint...")
-    ckpt = tf.train.get_checkpoint_state(logs_train_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        print('Loading success, global_step is %s' % global_step)
-    else:
-        print('No checkpoint file found')
+# with tf.Session() as sess:
+sess=tf.Session()
+print ("Reading checkpoint...")
+ckpt = tf.train.get_checkpoint_state(logs_train_dir)
+if ckpt and ckpt.model_checkpoint_path:
+    global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+    saver.restore(sess, ckpt.model_checkpoint_path)
+    print('Loading success, global_step is %s' % global_step)
+else:
+    print('No checkpoint file found')
+def predict(image_array):
+        pre1,pre2,pre3,pre4,pre5,pre6,pre7 = sess.run([logit1,logit2,logit3,logit4,logit5,logit6,logit7], feed_dict={x: image_array,keep_prob:1.0})
+        prediction = np.reshape(np.array([pre1,pre2,pre3,pre4,pre5,pre6,pre7]),[-1,65])
+        #prediction = np.array([[pre1],[pre2],[pre3],[pre4],[pre5],[pre6],[pre7]])
+        #print(prediction)
 
-    pre1,pre2,pre3,pre4,pre5,pre6,pre7 = sess.run([logit1,logit2,logit3,logit4,logit5,logit6,logit7], feed_dict={x: image_array,keep_prob:1.0})
-    prediction = np.reshape(np.array([pre1,pre2,pre3,pre4,pre5,pre6,pre7]),[-1,65])
-    #prediction = np.array([[pre1],[pre2],[pre3],[pre4],[pre5],[pre6],[pre7]])
-    #print(prediction)
+        max_index = np.argmax(prediction,axis=1)
+        print(max_index)
+        line = ''
+        for i in range(prediction.shape[0]):
+            if i == 0:
+                result = np.argmax(prediction[i][0:31])
+            if i == 1:
+                result = np.argmax(prediction[i][41:65])+41
+            if i > 1:
+                result = np.argmax(prediction[i][31:65])+31
 
-    max_index = np.argmax(prediction,axis=1)
-    print(max_index)
-    line = ''
-    for i in range(prediction.shape[0]):
-        if i == 0:
-            result = np.argmax(prediction[i][0:31])
-        if i == 1:
-            result = np.argmax(prediction[i][41:65])+41
-        if i > 1:
-            result = np.argmax(prediction[i][31:65])+31
+            line += chars[result]+" "
+        print ('predicted: ' + line)  
 
-        line += chars[result]+" "
-    print ('predicted: ' + line)  
+
+test_dir = './data/results/'
+test_image = []
+for file in os.listdir(test_dir):
+    test_image.append(test_dir + file)
+test_image = list(test_image)
+for i in range(1,6):
+    image_array = test_one_image(test_dir+'%d.png'%i)
+    print("predict picture %d"%i)
+    predict(image_array)
+
